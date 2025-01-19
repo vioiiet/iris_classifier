@@ -1,0 +1,39 @@
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.utils import to_categorical
+
+# Загружаем набор данных
+iris = load_iris()
+X = iris.data  # Признаки (длину и ширину чашелистика и лепестка)
+y = iris.target  # Целевые метки (виды ириса)
+
+# Преобразуем целевые метки в one-hot кодирование
+y = to_categorical(y)
+
+# Разделяем данные на обучающую и тестовую выборки
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Масштабируем признаки
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Создаем модель
+model = Sequential()
+model.add(Dense(10, input_dim=4, activation='relu'))  # Первый скрытый слой
+model.add(Dense(5, activation='relu'))  # Второй скрытый слой
+model.add(Dense(3, activation='softmax'))  # Выходной слой
+
+# Компилируем модель
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# Обучаем модель
+model.fit(X_train, y_train, epochs=100, batch_size=5, verbose=1)
+
+# Оцениваем модель
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f'Точность модели: {accuracy * 100:.2f}%')
+print(f'Значение функции потерь на тестовой выборке: {loss:.4f}')
